@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Campus Mess Menu</title>
+    <!-- Cute Meal SVG Favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10 60 C 10 90, 90 90, 90 60 Z' fill='%23FF6B6B' /%3E%3Ccircle cx='35' cy='70' r='4' fill='%23fff'/%3E%3Ccircle cx='65' cy='70' r='4' fill='%23fff'/%3E%3Cpath d='M45 75 Q 50 80, 55 75' stroke='%23fff' stroke-width='3' fill='transparent' stroke-linecap='round'/%3E%3Cpath d='M40 40 Q 30 25, 40 10' stroke='%23ccc' stroke-width='4' fill='transparent' stroke-linecap='round'/%3E%3Cpath d='M60 45 Q 70 30, 60 15' stroke='%23ccc' stroke-width='4' fill='transparent' stroke-linecap='round'/%3E%3C/svg%3E" type="image/svg+xml">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            height: 100%; background-color: #0f0f11; color: #ffffff;
+            font-family: 'Inter', sans-serif; overflow: hidden; 
+        }
+
+        .icon { width: 24px; height: 24px; fill: currentColor; display: inline-block; vertical-align: middle; }
+
+        /* Full Screen Backgrounds for Transitioning */
+        .bg-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            filter: brightness(0.3) blur(8px); z-index: 1;
+            transition: opacity 0.8s ease-in-out; opacity: 0; pointer-events: none;
+        }
+        .bg-layer.active { opacity: 1; }
+
+        /* Shimmer Overlay */
+        .shimmer-effect {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+            transform: translateX(-100%); z-index: 2; pointer-events: none;
+        }
+        .shimmer-effect.play { animation: shimmerSweep 0.8s ease-in-out forwards; }
+        @keyframes shimmerSweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        /* Native Scroll Capture Layer for infinite smooth scrolling */
+        .scroll-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            overflow-y: auto; scroll-snap-type: y mandatory; z-index: 10;
+            -ms-overflow-style: none; scrollbar-width: none;
+        }
+        .scroll-layer::-webkit-scrollbar { display: none; }
+        
+        .scroll-item-proxy { width: 100%; height: 80px; scroll-snap-align: center; pointer-events: none; }
+
+        /* Wheel UI Container */
+        .wheel-ui-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 15; pointer-events: none; 
+        }
+
+        /* Arc ring for aesthetic */
+        .wheel-arc {
+            position: absolute; border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
+        }
+
+        /* The Revolving Meal Images */
+        .wheel-item {
+            position: absolute; width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4); overflow: hidden; pointer-events: auto;
+            cursor: pointer; opacity: 0.4; background: #2a2a2d; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        border-radius 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        border-width 0.4s, opacity 0.4s;
+        }
+        .wheel-item img {
+            width: 100%; height: 100%; object-fit: cover; pointer-events: none;
+            user-select: none; -webkit-user-drag: none; border-radius: inherit; transition: inherit;
+        }
+
+        /* Active Selected Item */
+        .wheel-item.active {
+            width: 90px; height: 90px; border-radius: 16px; border: 3px solid #fff;
+            opacity: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 20;
+        }
+
+        /* Right Hand Info Panel */
+        .info-panel {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            left: 120px; right: 20px; display: flex; flex-direction: column; 
+            justify-content: center; align-items: flex-start;
+            pointer-events: auto; cursor: pointer; z-index: 20;
+        }
+
+        @media (min-width: 768px) {
+            .info-panel { left: 35vw; right: 10vw; }
+            .wheel-item { width: 60px; height: 60px; }
+            .wheel-item.active { width: 110px; height: 110px; }
+        }
+
+        .info-panel .happy-text {
+            font-size: 0.85rem; color: rgba(255, 255, 255, 0.85); text-transform: uppercase;
+            letter-spacing: 2px; font-weight: 600; margin-bottom: 6px;
+        }
+
+        /* Updated main dish typography for multi-line support */
+        .info-panel .main-dish {
+            font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 5.5vw, 2.8rem);
+            line-height: 1.15; font-weight: 700; color: #fff; margin-bottom: 12px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+        }
+
+        .badge-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+
+        .info-panel .meal-type {
+            font-size: 0.75rem; font-weight: 800; background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            padding: 4px 10px; border-radius: 20px; text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .info-panel .holiday-badge {
+            background: #f87171; color: #fff; padding: 3px 8px; border-radius: 12px;
+            font-size: 0.65rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; display: none;
+        }
+
+        /* Dynamic Status Indicator */
+        .status-badge {
+            font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+            display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff;
+        }
+        .status-serving { background: rgba(74, 222, 128, 0.2); border-color: #4ade80; color: #4ade80; }
+        .status-stopped { background: rgba(248, 113, 113, 0.2); border-color: #f87171; color: #f87171; }
+        .status-starting { background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24; }
+
+        .info-panel .timing { font-size: 0.75rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 4px; margin-top: 6px;}
+        .tap-prompt { margin-top: 14px; font-size: 0.7rem; opacity: 0.7; display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 20px; }
+
+        /* Bottom Sheet Modal */
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 85vh;
+            background: rgba(20, 20, 22, 0.95); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); border-top-left-radius: 30px; border-top-right-radius: 30px;
+            z-index: 100; transition: bottom 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            padding: 30px 24px; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+        .bottom-sheet.open { bottom: 0; }
+        .sheet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+        .sheet-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; line-height: 1.1; }
+        .close-btn { background: rgba(255,255,255,0.1); border: none; width: 40px; height: 40px; border-radius: 50%; color: #fff; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0; }
+        .sheet-section { margin-bottom: 24px; overflow-y: auto; flex: 1; padding-bottom: 20px; }
+        .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .items-list { font-size: 1.05rem; line-height: 1.6; color: #eee; margin-bottom: 20px; }
+
+        .nutrition-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .nutrition-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
+        .nutrition-card .icon-wrapper { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 12px; color: #FF6B6B; }
+        .nutrition-card:nth-child(2) .icon-wrapper { color: #4ECDC4; }
+        .nutrition-card:nth-child(3) .icon-wrapper { color: #FFE66D; }
+        .nutrition-card:nth-child(4) .icon-wrapper { color: #FFA07A; }
+        .nutrition-info { display: flex; flex-direction: column; }
+        .nutrition-val { font-weight: 800; font-size: 1.1rem; }
+        .nutrition-label { font-size: 0.75rem; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <!-- Backgrounds for Crossfade & Shimmer -->
+    <div class="bg-layer active" id="bg-layer-1"></div>
+    <div class="bg-layer" id="bg-layer-2"></div>
+    <div class="shimmer-effect" id="shimmer"></div>
+
+    <!-- The Infinite Native Scroll Layer -->
+    <div class="scroll-layer" id="scroll-layer">
+        <div id="scroll-proxies-container"></div>
+
+        <div class="wheel-ui-layer">
+            <div class="info-panel" onclick="openCurrentSheet()">
+                <div class="happy-text">Happy <span id="ui-day">Monday</span></div>
+                <div class="main-dish" id="ui-main-dish">Main Dish</div>
+                
+                <div class="badge-row">
+                    <div class="meal-type" id="ui-meal-type">Meal</div>
+                    <div class="holiday-badge" id="ui-holiday">Holiday</div>
+                </div>
+
+                <div class="status-badge" id="ui-status">Calculating...</div>
+                
+                <div class="timing">
+                    <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" fill="currentColor"/></svg>
+                    <span id="ui-time">00:00 AM - 00:00 PM</span>
+                </div>
+
+                <div class="tap-prompt">
+                    <svg class="icon" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5C12.88 5 14 6.12 14 7.5V11.24C14 11.89 14.53 12.42 15.18 12.42C15.83 12.42 16.36 11.89 16.36 11.24V10.11C16.36 8.73 17.48 7.61 18.86 7.61C20.24 7.61 21.36 8.73 21.36 10.11V16.36C21.36 19.5 18.8 22.06 15.66 22.06H10.15C7.45 22.06 5.16 20.08 4.75 17.4L4.03 12.85C3.89 11.95 4.54 11.16 5.44 11.16C6 11.16 6.5 11.45 6.75 11.94L7.86 14.15V11.24C7.86 10.59 8.39 10.06 9.04 10.06C9.69 10.06 10.22 10.59 10.22 11.24Z" fill="currentColor"/></svg>
+                    Tap anywhere here for menu
+                </div>
+            </div>
+            
+            <div class="wheel-arc" id="wheel-arc"></div>
+            <div id="wheel-items-container"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Sheet -->
+    <div class="bottom-sheet" id="details-sheet">
+        <div class="sheet-header">
+            <div>
+                <h2 class="sheet-title" id="sheet-title">Meal Details</h2>
+            </div>
+            <button class="close-btn" onclick="closeSheet()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div class="sheet-section">
+            <div class="section-title">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M11 9H13V7H11M12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20M12 2A10 10 0 0 0 2 12A10 10 0 0 0 12 22A10 10 0 0 0 22 12A10 10 0 0 0 12 2M11 17H13V11H11V17Z" fill="currentColor"/></svg>
+                Menu Items
+            </div>
+            <div class="items-list" id="sheet-items"></div>
+            <div class="section-title" style="margin-top: 24px;">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M17,8C8,10 5.82,17 5.82,17C5.82,17 7.22,8 17,8M15,11C10,12 8,16 8,16C8,16 9.17,11 15,11M21,16.5C21,16.5 15,11 10,11C10,11 13.5,16.5 21,16.5Z" fill="currentColor"/></svg>
+                Probable Ingredients
+            </div>
+            <div class="items-list" id="sheet-ingredients" style="font-size: 0.95rem; color:#aaa;"></div>
+            <div class="section-title" style="margin-top: 24px;">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,13H11V3H3V13Z" fill="currentColor"/></svg>
+                Estimated Nutrition
+            </div>
+            <div class="nutrition-grid">
+                <div class="nutrition-card">
+                    <div class="icon-wrapper"><svg class="icon" viewBox="0 0 24 24"><path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13.06 3.23 12.04 3.76 11.23 4.43C9.28 6.04 8.24 8.76 8.7 11.25C8.75 11.53 8.62 11.83 8.39 11.97C8.16 12.12 7.85 12.08 7.66 11.89C7.32 11.53 7.05 11.1 6.84 10.64C6.11 11.55 5.73 12.67 5.76 13.84C5.85 17.15 8.7 19.86 12 19.96C15.41 20.06 18.25 17.3 18.25 13.88C18.25 12.92 18.04 12 17.66 11.2M11.97 18.06C10.63 18.06 9.54 16.97 9.54 15.63C9.54 13.68 12.28 10.87 12.28 10.87C12.28 10.87 14.41 13.67 14.41 15.62C14.41 16.97 13.32 18.06 11.97 18.06Z" fill="currentColor"/></svg></div>
+                    <div class="nutrition-info"><span class="nutrition-val" id="sheet-cals">0</span><span class="nutrition-label">kcal</span></div>
+                </div>
+                <div class="nutrition-card">
+                    <div class="icon-wrapper"><svg class="icon" viewBox="0 0 24 24"><path d="M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12.5,7C14.43,7 16,8.57 16,10.5C16,11.23 15.77,11.91 15.39,12.45L16.29,14.65L14.43,15.41L13.78,13.83C13.38,13.94 12.95,14 12.5,14C10.57,14 9,12.43 9,10.5C9,8.57 10.57,7 12.5,7M12.5,9A1.5,1.5 0 0,0 11,10.5A1.5,1.5 0 0,0 12.5,12A1.5,1.5 0 0,0 14,10.5A1.5,1.5 0 0,0 12.5,9Z" fill="currentColor"/></svg></div>
+                    <div class="nutrition-info"><span class="nutrition-val" id="sheet-pro">0g</span><span class="nutrition-label">Protein</span></div>
+                </div>
+                <div class="nutrition-card">
+                    <div class="icon-wrapper"><svg class="icon" viewBox="0 0 24 24"><path d="M12.63,20L11.22,21.41L9.81,20L10.39,15.65C9.4,14.69 9.38,13.1 10.32,12.11L12.58,9.85C12.78,9.66 13,9.5 13.25,9.39L13.1,6.5L13.73,5.88L15.35,8.1L17.57,6.47L18.19,7.1L15.3,6.95C15.41,7.21 15.57,7.44 15.76,7.64L18.03,9.9C18.97,10.84 19,12.44 18,13.41L13.67,14L12.63,20M6.03,11.33C5.09,10.39 5.07,8.8 6.03,7.84L8.29,5.58C8.5,5.39 8.73,5.23 8.96,5.12L8.81,2.23L9.44,1.6L11.06,3.82L13.28,2.2L13.91,2.83L11.03,2.68C11.13,2.94 11.29,3.17 11.47,3.37L13.74,5.63C14.68,6.57 14.7,8.17 13.74,9.13L9.38,9.7L8.34,15.7L6.93,17.12L5.53,15.7L6.1,11.33M20.25,18.06C21.19,17.12 21.21,15.53 20.25,14.57L17.97,12.29C17.76,12.08 17.52,11.93 17.28,11.83L17.43,14.72L16.8,15.35L15.19,13.12L12.96,14.75L12.33,14.12L15.22,14.27C15.12,14 14.96,13.78 14.78,13.58L12.5,11.31C11.56,10.37 11.55,8.77 12.5,7.81L16.88,7.23L17.92,1.23L19.33,2.64L20.74,1.23L20.16,5.61L20.25,18.06Z" fill="currentColor"/></svg></div>
+                    <div class="nutrition-info"><span class="nutrition-val" id="sheet-carbs">0g</span><span class="nutrition-label">Carbs</span></div>
+                </div>
+                <div class="nutrition-card">
+                    <div class="icon-wrapper"><svg class="icon" viewBox="0 0 24 24"><path d="M12,20A6,6 0 0,1 6,14C6,10 12,3.25 12,3.25C12,3.25 18,10 18,14A6,6 0 0,1 12,20Z" fill="currentColor"/></svg></div>
+                    <div class="nutrition-info"><span class="nutrition-val" id="sheet-fats">0g</span><span class="nutrition-label">Fats</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const daysArr =["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const mealTypes =["Breakfast", "Lunch", "Snacks", "Dinner"];
+    const macros = { Breakfast: { cals: 450, p: 15, c: 65, f: 14 }, Lunch: { cals: 750, p: 25, c: 110, f: 22 }, Snacks: { cals: 300, p: 10, c: 40, f: 12 }, Dinner: { cals: 680, p: 20, c: 90, f: 18 } };
+
+    // Raw input map from the mess menu text
+    const rawMenu =[
+        { d: 0, m: 0, i:["Masala / Mysore Dosa", "Sambhar", "Coconut Chutney", "Bread Butter Jam", "Boiled Egg", "Corn Flakes", "Chocolate Powder", "Milk", "Tea"] },
+        { d: 0, m: 1, i:["Aloo Chips", "Rajwadi Khichadi", "Dahi Tikhari", "Roti", "Salad", "Nimbu Pani / Butter Milk"] },
+        { d: 0, m: 2, i:["Delhi Chaat / Bhel", "Egg Live", "Tea", "Hot & Cold Milk", "Toast / Bread / Jam / Butter", "Coffee Powder"] },
+        { d: 0, m: 3, i:["Anda Biryani / Anda Curry / Anda Fried Rice", "Paneer Matar / Paneer Do Pyaza", "Dal Fry", "Rice", "Roti", "Salad"] },
+        { d: 1, m: 0, i:["Poha / Upma with Namkeen", "Daliya", "Sprouts Chana", "Aloo Mutter Sandwich", "Boiled Egg", "Corn Flakes", "Chocolate Powder", "Milk", "Tea"] },
+        { d: 1, m: 1, i:["Rajma", "Onion Rice", "Dal", "Roti", "Salad", "Boondi Raita", "Nimbu Pani / Butter Milk"] },
+        { d: 1, m: 2, i:["Moong Dal Kachori / Pyaz Kachori with Ragda", "Egg Live", "Tea", "Hot & Cold Milk", "Toast / Bread / Jam / Butter", "Coffee Powder"] },
+        { d: 1, m: 3, i:["Jeera Aloo", "Panchratn Dal", "Rice", "Puri", "Salad", "Kheer"] },
+        { d: 2, m: 0, i:["Aloo Paratha", "Daliya", "Schezwan Sauce + Dahi", "Bread Butter Jam", "Boiled Egg", "Corn Flakes", "Chocolate Powder", "Milk", "Tea"] },
+        { d: 2, m: 1, i:["Desi Chana", "Aloo Gobhi Mutter", "Dal Tadka", "Rice", "Roti", "Salad", "Nimbu Pani / Butter Milk"] },
+        { d: 2, m: 2, i:["Vada Pav / Burger / Dabeli", "Egg Live", "Tea", "Hot & Cold Milk", "Toast / Bread / Jam / Butter", "Coffee Powder"] },
+        { d: 2, m: 3, i:["Mushroom Matar Masala", "Pulao", "Vegetable Raita", "Roti", "Salad"] },
+        { d: 3, m: 0, i:["Idli", "Vada", "Sambhar", "Chutney", "Daliya", "Sprout Mix", "Vegetable Sandwich", "Boiled Egg", "Corn Flakes", "Chocolate Powder", "Milk", "Tea"] },
+        { d: 3, m: 1, i:["Cabbage Matar", "Moong", "Kadhi Pakoda", "White Pulav", "Roti", "Fryums", "Salad", "Nimbu Pani / Butter Milk"] },
+        { d: 3, m: 2, i:["Pani Puri / Dahi Puri", "Egg Live", "Tea", "Hot & Cold Milk", "Toast / Bread / Jam / Butter", "Coffee Powder"] },
+        { d: 3, m: 3, i:["Afghani Chicken / Chicken Biryani", "Paneer Kadai / Paneer Afghani / Paneer Hyderabadi", "Roti / Tandoori Naan", "Plain Rice", "Dal", "Ice Cream"] },
+        { d: 4, m: 0, i:["Dry Aloo Puri / Thepla", "Daliya", "Sprout Chana", "Cheese Veg Sandwich", "Boiled Egg", "Corn Flakes", "Chocolate Powder", "Milk", "Tea"] },
+        { d: 4, m: 1, i:["Veg Handi", "Mix Kathol", "Palak Dal", "Jeera Rice", "Roti", "Curd", "Nimbu Pani / Butter Milk"] },
+        { d: 4, m: 2, i:["Bread Pakoda", "Egg Live", "Tea", "Hot & Cold Milk", "Toast / Bread / Jam / Butter", "Coffee Powder"] },
+        { d: 4, m: 3, i:["Malai Kofta / Pav Bhaji", "Dal (only with malai kofta)", "Pulav", "Roti", "Dahi Vada", "Salad"] },
+        { d: 5, m: 0, i:["Uttapam", "Sambhar", "Chutney", "Daliya", "Sprout", "Cheese Sandwich", "Boiled Egg", "Corn Flakes", "Chocolate Powder", "Milk", "Tea"] },
+        { d: 5, m: 1, i:["Palak Paneer", "Jeera Rice", "Chana Dal Rajasthani", "Plain Rice", "Roti", "Curd", "Fruit Custard / Aamras / Gulab Jamun"] },
+        { d: 5, m: 2, i:["Samosa Chaat", "Egg Live", "Tea", "Hot & Cold Milk", "Toast / Bread / Jam / Butter", "Coffee Powder"] },
+        { d: 5, m: 3, i:["Dal Bati / Litti Chokha", "Dal", "Rice", "Roti", "Salad", "Butter Milk"] },
+        { d: 6, m: 0, i:["Aloo Onion Paratha", "Schezwan Sauce + Dahi", "Daliya", "Bread Butter Jam", "Boiled Egg", "Corn Flakes", "Chocolate Powder", "Milk", "Tea"] },
+        { d: 6, m: 1, i:["Kathal / Kaddu", "Vatana", "Jeera Rice", "Yellow Dal", "Roti", "Salad", "Curd"] },
+        { d: 6, m: 2, i:["Maggi / Noodles / Pasta", "Egg Live", "Tea", "Hot & Cold Milk", "Toast / Bread / Jam / Butter", "Coffee Powder"] },
+        { d: 6, m: 3, i:["Fried Rice", "Manchurian", "Aloo Pyaz", "Roti", "Salad", "Dahi"] }
+    ];
+
+    // Data Engine: Transforms Slashes to ' OR ' & intelligently extracts core Main Dishes
+    const timelineData = rawMenu.map(m => {
+        const dayName = daysArr[m.d];
+        const mealName = mealTypes[m.m];
+        
+        const formattedItems = m.i.map(item => item.replace(/\s*\/\s*/g, ' OR '));
+        
+        let mainDish = formattedItems[0];
+        // Combine top 2 items for Lunch/Dinner 
+        if (mealName === 'Lunch' || mealName === 'Dinner') {
+            if (formattedItems.length > 1) {
+                mainDish = formattedItems[0] + " & " + formattedItems[1];
+            }
+        }
+        // Exception to group Idli & Vada together as main
+        if (dayName === 'Wednesday' && mealName === 'Breakfast') {
+            mainDish = formattedItems[0] + " & " + formattedItems[1];
+        }
+
+        // Generate matching local path format -> images/snacks_wednesday.png
+        const imgPath = `images/${mealName.toLowerCase()}_${dayName.toLowerCase()}.png`;
+
+        return {
+            ...m,
+            dayName: dayName,
+            mealName: mealName,
+            items: formattedItems,
+            mainDish: mainDish,
+            img: imgPath
+        };
+    });
+
+    function getProbableIngredients(items) {
+        let str = items.join(" ").toLowerCase(); let ing =["Local vegetables", "Salt & Spices", "Oil"];
+        if(str.includes('paneer')||str.includes('cheese')) ing.push("Cottage Cheese/Dairy");
+        if(str.includes('chicken')||str.includes('anda')||str.includes('egg')) ing.push("Protein Core");
+        if(str.includes('rice')||str.includes('pulav')||str.includes('biryani')||str.includes('dosa')||str.includes('idli')) ing.push("Rice base");
+        if(str.includes('dal')||str.includes('rajma')||str.includes('chana')) ing.push("Lentils/Pulses");
+        if(str.includes('milk')||str.includes('dahi')||str.includes('curd')) ing.push("Fresh Dairy");
+        if(str.includes('roti')||str.includes('puri')||str.includes('paratha')||str.includes('bread')) ing.push("Whole Wheat");
+        if(str.includes('aloo')||str.includes('potato')) ing.push("Potatoes");
+        return ing.join(" • ");
+    }
+
+    // --- Core Timing & Status Engine ---
+    function isHoliday(d) {
+        const mmdd = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+        const yyyymmdd = d.getFullYear() + '-' + mmdd;
+        const fixed =["01-01", "01-26", "08-15", "10-02", "12-25"];
+        const variable =["2024-03-25", "2024-04-11", "2024-10-31", "2025-03-14", "2025-10-20", "2026-03-03", "2026-11-08"]; 
+        return fixed.includes(mmdd) || variable.includes(yyyymmdd);
+    }
+
+    const tSlots = {
+        wk:[{s: 8*60+15, e: 10*60+30, str:"08:15 AM - 10:30 AM"}, {s: 12*60+30, e: 14*60+45, str:"12:30 PM - 02:45 PM"}, {s: 17*60, e: 18*60+15, str:"05:00 PM - 06:15 PM"}, {s: 20*60, e: 21*60+30, str:"08:00 PM - 09:30 PM"}],
+        hol:[{s: 9*60, e: 11*60, str:"09:00 AM - 11:00 AM"}, {s: 13*60, e: 14*60+30, str:"01:00 PM - 02:30 PM"}, {s: 17*60, e: 18*60+15, str:"05:00 PM - 06:15 PM"}, {s: 20*60, e: 21*60+30, str:"08:00 PM - 09:30 PM"}]
+    };
+
+    let baseSunday;
+    function initBaseDate() {
+        let today = new Date();
+        baseSunday = new Date(today);
+        baseSunday.setDate(today.getDate() - today.getDay());
+        baseSunday.setHours(0,0,0,0);
+    }
+
+    // Mathematical map of ANY global infinite index to an exact Date and Time Slot
+    function getMealTimingInfo(globalIdx) {
+        let cycle = Math.floor(globalIdx / 28) - 50; 
+        let localIdx = ((globalIdx % 28) + 28) % 28; 
+        let meal = timelineData[localIdx];
+        
+        let mDate = new Date(baseSunday);
+        mDate.setDate(baseSunday.getDate() + (cycle * 7) + meal.d);
+        
+        let isHol = isHoliday(mDate);
+        let useWknd = (meal.d === 0 || meal.d === 6 || isHol);
+        let slot = useWknd ? tSlots.hol[meal.m] : tSlots.wk[meal.m];
+        
+        return {
+            ...meal, isHol, timeStr: slot.str,
+            startMs: mDate.getTime() + slot.s * 60000,
+            endMs: mDate.getTime() + slot.e * 60000
+        };
+    }
+
+    // Auto-detect the CURRENT active global index according to the 60-min rule
+    function computeTargetGlobalIndex() {
+        let nowMs = Date.now();
+        let todayIdxOffset = new Date().getDay() * 4;
+        let scanStart = 1400 + todayIdxOffset - 8; // Scan back 2 days
+        
+        for(let i = scanStart; i < scanStart + 16; i++) {
+            let mInfo = getMealTimingInfo(i);
+            let focusStart = mInfo.startMs - (60 * 60000); // Shift focus 1hr before it starts
+            
+            let nextInfo = getMealTimingInfo(i+1);
+            let focusEnd = nextInfo.startMs - (60 * 60000); // Focus ends when next meal takes focus
+            
+            if(nowMs >= focusStart && nowMs < focusEnd) return i;
+        }
+        return 1400; // Safe Fallback
+    }
+
+    // --- Rendering Math & Infinity Engine ---
+    const TOTAL_PROXIES = 2800; // 100 weeks worth of physical scrolling capacity
+    const CENTER_OFFSET = 1400; // Week 50 is our mathematical present
+    const ITEM_HEIGHT = 80; 
+    const ANGLE_SPACING = 16; 
+    
+    const scrollLayer = document.getElementById('scroll-layer');
+    const proxyContainer = document.getElementById('scroll-proxies-container');
+    const itemsContainer = document.getElementById('wheel-items-container');
+    const wheelArc = document.getElementById('wheel-arc');
+    
+    let R, cx, cy;
+    const wheelItemElements =[];
+
+    function computeGeometry() {
+        const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+        if (isDesktop) {
+            R = window.innerHeight * 0.65;
+            cx = window.innerWidth * 0.25 - R; // Center-ish on desktop
+        } else {
+            R = window.innerHeight * 0.75; 
+            // We want left edge of 90px active item to be at ~15px
+            // Center of active item = 15 + 45 = 60px.  x = cx + R = 60px.
+            cx = 60 - R; 
+        }
+        cy = window.innerHeight / 2;
+
+        wheelArc.style.width = `${R * 2}px`;
+        wheelArc.style.height = `${R * 2}px`;
+        wheelArc.style.left = `${cx}px`;
+        wheelArc.style.top = `${cy}px`;
+    }
+
+    function buildInfiniteUI() {
+        for(let i=0; i<TOTAL_PROXIES; i++) {
+            let proxy = document.createElement('div');
+            proxy.className = 'scroll-item-proxy';
+            proxyContainer.appendChild(proxy);
+        }
+        proxyContainer.style.paddingTop = `calc(50vh - ${ITEM_HEIGHT/2}px)`;
+        proxyContainer.style.paddingBottom = `calc(50vh - ${ITEM_HEIGHT/2}px)`;
+
+        // Only 28 real image elements looping endlessly
+        for(let i=0; i<28; i++) {
+            let wItem = document.createElement('div');
+            wItem.className = 'wheel-item';
+            
+            // Image with fallback logic if the local file isn't found during testing 
+            // (Provides a nice colored fallback instead of broken icon)
+            wItem.innerHTML = `<img src="${timelineData[i].img}" loading="lazy" onerror="this.style.display='none'; this.parentElement.style.background='#3f3f46';">`;
+            
+            wItem.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let curGlobal = Math.round(scrollLayer.scrollTop / ITEM_HEIGHT);
+                let curLocal = ((curGlobal % 28) + 28) % 28;
+                if (curLocal === i) openCurrentSheet();
+                else {
+                    // Find closest global index mapped to this local index i
+                    let diff = i - curLocal;
+                    if(diff > 14) diff -= 28;
+                    if(diff < -14) diff += 28;
+                    scrollLayer.scrollTo({ top: (curGlobal + diff) * ITEM_HEIGHT, behavior: 'smooth' });
+                }
+            });
+
+            itemsContainer.appendChild(wItem);
+            wheelItemElements.push(wItem);
+        }
+    }
+
+    // --- UI Update Pipeline ---
+    let activeGlobalIndex = -1;
+    let activeBgSlot = 1;
+    let shimmerEl = document.getElementById('shimmer');
+
+    function updateStatusUI(info, nowMs) {
+        let badge = document.getElementById('ui-status');
+        badge.className = 'status-badge'; 
+        
+        if (nowMs > info.endMs) {
+            badge.textContent = "Stopped Serving";
+            badge.classList.add('status-stopped');
+        } else if (nowMs >= info.startMs && nowMs <= info.endMs) {
+            badge.textContent = "Serving Now";
+            badge.classList.add('status-serving');
+        } else {
+            let diffMins = Math.floor((info.startMs - nowMs) / 60000);
+            if (diffMins <= 60 && diffMins > 0) {
+                badge.textContent = `Will start serving in ${diffMins} mins`;
+                badge.classList.add('status-starting');
+            } else {
+                badge.textContent = "Upcoming";
+            }
+        }
+    }
+
+    function updateRightPanel(globalIdx) {
+        let info = getMealTimingInfo(globalIdx);
+        
+        document.getElementById('ui-day').textContent = info.dayName;
+        document.getElementById('ui-main-dish').textContent = info.mainDish;
+        document.getElementById('ui-meal-type').textContent = info.mealName;
+        document.getElementById('ui-time').textContent = info.timeStr;
+        document.getElementById('ui-holiday').style.display = info.isHol ? "block" : "none";
+
+        updateStatusUI(info, Date.now());
+
+        // Background Transition
+        let nextBgSlot = activeBgSlot === 1 ? 2 : 1;
+        let nextBgEl = document.getElementById(`bg-layer-${nextBgSlot}`);
+        let currBgEl = document.getElementById(`bg-layer-${activeBgSlot}`);
+        
+        nextBgEl.style.backgroundImage = `url(${info.img})`;
+        
+        shimmerEl.classList.remove('play');
+        void shimmerEl.offsetWidth; 
+        shimmerEl.classList.add('play');
+
+        nextBgEl.classList.add('active');
+        currBgEl.classList.remove('active');
+        activeBgSlot = nextBgSlot;
+    }
+
+    function renderWheel() {
+        const scrollTop = scrollLayer.scrollTop;
+        const continuousPos = scrollTop / ITEM_HEIGHT;
+        let currentGlobal = Math.round(continuousPos);
+        currentGlobal = Math.max(0, Math.min(TOTAL_PROXIES - 1, currentGlobal));
+
+        if (currentGlobal !== activeGlobalIndex) {
+            activeGlobalIndex = currentGlobal;
+            updateRightPanel(activeGlobalIndex);
+        }
+
+        // Loop the 28 physical nodes dynamically around the arc
+        wheelItemElements.forEach((el, i) => {
+            let localWrap = ((continuousPos % 28) + 28) % 28;
+            let relPos = i - localWrap;
+            
+            // Shortest path circular wrap
+            if (relPos > 14) relPos -= 28;
+            if (relPos < -14) relPos += 28;
+
+            let theta = relPos * ANGLE_SPACING * (Math.PI / 180);
+            let x = cx + R * Math.cos(theta);
+            let y = cy + R * Math.sin(theta);
+
+            el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+            if (Math.abs(relPos) < 0.5) el.classList.add('active');
+            else el.classList.remove('active');
+        });
+    }
+
+    // --- Auto-Live Interval ---
+    let lastInteractionTime = 0;
+    let autoTargetIndex = -1;
+
+    function handleInteraction() { lastInteractionTime = Date.now(); }['touchstart','touchmove','wheel','mousedown'].forEach(ev => window.addEventListener(ev, handleInteraction));
+
+    setInterval(() => {
+        let nowMs = Date.now();
+        let target = computeTargetGlobalIndex();
+        
+        // Auto scroll to next meal if untouched for 8 seconds and the target has officially shifted
+        if (target !== autoTargetIndex) {
+            autoTargetIndex = target;
+            if (nowMs - lastInteractionTime > 8000) {
+                scrollLayer.scrollTo({ top: target * ITEM_HEIGHT, behavior: 'smooth' });
+            }
+        }
+        // Always refresh active status live countdown
+        if(activeGlobalIndex !== -1) {
+            updateStatusUI(getMealTimingInfo(activeGlobalIndex), nowMs);
+        }
+    }, 1000);
+
+    // --- Modal Logic ---
+    const sheet = document.getElementById('details-sheet');
+    function openCurrentSheet() {
+        if(activeGlobalIndex === -1) return;
+        let info = getMealTimingInfo(activeGlobalIndex);
+        document.getElementById('sheet-title').textContent = `${info.dayName} ${info.mealName}`;
+        document.getElementById('sheet-items').innerHTML = info.items.map(item => `• ${item}`).join('<br>');
+        document.getElementById('sheet-ingredients').textContent = getProbableIngredients(info.items);
+        
+        let mod = info.items.length; let b = macros[info.mealName];
+        document.getElementById('sheet-cals').textContent = b.cals + (mod*5);
+        document.getElementById('sheet-pro').textContent = (b.p + mod) + "g";
+        document.getElementById('sheet-carbs').textContent = (b.c + mod) + "g";
+        document.getElementById('sheet-fats').textContent = b.f + "g";
+        sheet.classList.add('open');
+    }
+    function closeSheet() { sheet.classList.remove('open'); }
+    
+    let startY = 0;
+    sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive: true});
+    sheet.addEventListener('touchend', e => { if (e.changedTouches[0].clientY > startY + 50) closeSheet(); });
+
+    scrollLayer.addEventListener('scroll', () => requestAnimationFrame(renderWheel));
+    window.addEventListener('resize', () => { computeGeometry(); renderWheel(); });
+
+    // --- Boot Sequence ---
+    window.addEventListener('DOMContentLoaded', () => {
+        initBaseDate();
+        computeGeometry();
+        buildInfiniteUI();
+        
+        autoTargetIndex = computeTargetGlobalIndex();
+        
+        // Instant teleport to mathematically perfect infinite location
+        setTimeout(() => {
+            scrollLayer.scrollTo({ top: autoTargetIndex * ITEM_HEIGHT, behavior: 'auto' });
+            renderWheel();
+        }, 50);
+    });
+
+</script>
+</body>
+</html>
