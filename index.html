@@ -1,19 +1,34 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f2efe4"><meta name="description" content="The GNLU mess menu, filed daily. Today's dishes, serving times and committee updates."><title>The Mess v. Hunger · GNLU</title><link rel="icon" href="images/bowl.svg" type="image/svg+xml"><link rel="stylesheet" href="app.css"></head>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171b1b"><meta name="description" content="The GNLU mess menu, served fresh each day."><title>Mess, Set. · GNLU</title>
+<link rel="icon" href="images/bowl.svg" type="image/svg+xml"><link rel="stylesheet" href="app.css">
+</head>
 <body>
 <a class="skip" href="#daily-menu">Skip to today's menu</a>
-<div class="folio">
-<header class="topline"><a class="wordmark" href="./"><img src="images/bowl.svg" alt="" width="39" height="39"><span>GNLU MESS<br><small>A DAILY MATTER</small></span></a><span class="topline-note">CANTEEN OF THE PEOPLE<br>GANDHINAGAR · INDIA</span><button id="week-toggle" aria-expanded="false" aria-controls="week-panel">Open the weekly file <span aria-hidden="true">↗</span></button></header>
+<div class="stage-noise" aria-hidden="true"></div>
+<header class="topline"><a class="wordmark" href="./"><img src="images/bowl.svg" alt="" width="34" height="34"><span>GNLU <b>MESS</b></span></a><span class="topline-note"><i></i> GANDHINAGAR, INDIA <span>·</span> DAILY SERVICE</span><button id="week-toggle" aria-expanded="false" aria-controls="week-panel">THE WHOLE WEEK <span aria-hidden="true">↗</span></button></header>
 <main>
-<section class="cover" aria-labelledby="cover-title"><div class="folio-no">FILE 09 / 26 <span>·</span> VOL. 01</div><p class="eyebrow"><span class="red-dot"></span> THE DAILY HEARING ON WHAT'S FOR LUNCH</p><h1 id="cover-title">The mess<br><em>v.</em> hunger<span class="fullstop">.</span></h1><div class="cover-bottom"><p>One campus. Four sittings.<br>The menu is now before the court.</p><svg class="cover-sketch" viewBox="0 0 120 90" aria-hidden="true"><path d="M15 55h83c-5 19-17 25-41 25S20 74 15 55Z"/><path d="M31 47c-8-10 9-13 0-24m23 24c-8-10 9-13 0-24m22 24c-8-10 9-13 0-24M24 85h64"/><path d="M9 50h95"/></svg><span class="file-stamp">DAILY<br>ISSUE<br>● GNLU ●</span></div></section>
-<section class="calendar" aria-label="Choose a menu date"><div class="calendar-heading"><div><span class="eyebrow">THE HEARING DATE</span><h2 id="selected-day"></h2></div><div class="calendar-controls"><button id="prev-week" aria-label="Previous week">←</button><button id="today">Today</button><button id="next-week" aria-label="Next week">→</button></div></div><div class="calendar-range" id="week-label"></div><nav id="day-strip" class="day-strip" aria-label="Days of this week"></nav></section>
+<section class="hero" aria-labelledby="cover-title">
+ <div class="hero-meta"><span>GOOD FOOD. QUESTIONABLE TIMETABLES.</span><span>23° 13′ N / 72° 41′ E</span></div>
+ <div class="hero-copy"><p class="eyebrow">THE CAMPUS MENU, MADE TANGIBLE</p><h1 id="cover-title">Mess,<br><em>set.</em></h1><p class="hero-intro">Four sittings. One very important question.<br><strong>What’s on the tray today?</strong></p><a class="scroll-cue" href="#daily-menu"><span>SCROLL TO SEE WHAT’S COOKING</span><b aria-hidden="true">↓</b></a></div>
+ <div class="orbit orbit-one" aria-hidden="true">FRESHLY FILED · GNLU MESS · MADE FOR HUNGRY MINDS · </div>
+ <div class="orbit orbit-two" aria-hidden="true"><span>01</span> DAILY SPECIAL <span>✳</span> GANDHINAGAR <span>✳</span></div>
+ <div class="scene" id="dish-scene" aria-label="Today's featured meal displayed on a floating, three-dimensional dinner plate">
+  <div class="scene-glow"></div><div class="scene-shadow"></div><div class="tray"><div class="tray-rim"><div class="tray-well"><div class="tray-food" id="spotlight"></div><div class="tray-glint"></div></div></div><div class="tray-foot"></div></div>
+  <div class="scene-garnish garnish-a" aria-hidden="true">✳</div><div class="scene-garnish garnish-b" aria-hidden="true">✦</div>
+  <svg class="scene-spoon" viewBox="0 0 290 90" fill="none" aria-hidden="true"><path d="M73 49c-17-16-17-31-2-36 19-6 42 8 35 27-6 17-24 17-33 9Zm15-4 154 27" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="m214 70 31 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  <span class="scene-label label-top">THE DAILY SPECIAL <i>✳</i></span><span class="scene-label label-bottom">SERVED WITH A SIDE OF DEADLINES</span>
+ </div>
+ <div class="hero-index"><span>AN UNOFFICIAL GNLU PROJECT</span><span>NO. <b>01</b> <i>—</i> ALWAYS HUNGRY</span></div>
+</section>
+<section class="calendar" aria-label="Choose a menu date"><div class="calendar-heading"><div><span class="eyebrow">PICK YOUR DAY</span><h2 id="selected-day"></h2></div><div class="calendar-controls"><button id="prev-week" aria-label="Previous week">←</button><button id="today">TODAY</button><button id="next-week" aria-label="Next week">→</button></div></div><div class="calendar-range" id="week-label"></div><nav id="day-strip" class="day-strip" aria-label="Days of this week"></nav></section>
 <div id="alerts" class="alerts" aria-live="polite"></div>
-<section id="week-panel" class="week-panel" hidden aria-labelledby="week-title"><div class="week-heading"><span class="eyebrow">EXHIBIT B · THE FULL WEEK</span><button id="week-close" aria-label="Close weekly file">Close file ×</button><h2 id="week-title">Everything on the record.</h2></div><div id="week-body" class="week-roll"></div><p class="fineprint">Slash-separated dishes are alternatives. The committee did not specify which week they rotate.</p></section>
-<section id="spotlight" class="spotlight" aria-label="Meal currently before the court"></section>
-<section id="daily-menu" class="daily-menu"><header class="section-heading"><div><span class="eyebrow">THE DAY'S PROCEEDINGS</span><h2>Four matters<br>on the table.</h2></div><p class="margin-note">Order in the<br>mess, please <span>↙</span></p></header><div id="meal-list" class="meal-list"></div></section>
-<section class="colophon"><span class="colophon-mark" aria-hidden="true">✳</span><div><span class="eyebrow">A NOTE FOR THE RECORD</span><p id="source-note"></p><p>“Or” means a listed alternative. Photographs are illustrative, not evidence of the exact serving.</p><p class="fineprint">Weekday/weekend timings follow the previous website's schedule. Dated committee notices take priority. Portions and nutrition were not supplied.</p><a href="image-credits.html">Photo credits &amp; sources ↗</a></div></section>
+<section id="week-panel" class="week-panel" hidden aria-labelledby="week-title"><div class="week-heading"><span class="eyebrow">THE LINEUP</span><button id="week-close" aria-label="Close weekly menu">CLOSE ×</button><h2 id="week-title">Seven days, coming right up.</h2></div><div id="week-body" class="week-roll"></div><p class="fineprint">Slash-separated dishes are alternatives. The committee did not specify which week they rotate.</p></section>
+<section id="daily-menu" class="daily-menu"><header class="section-heading"><div><span class="eyebrow">THE REST OF THE LINEUP</span><h2>Pick a sitting.<br><em>Open the lid.</em></h2></div><p class="menu-annotation">Four chances<br>to get fed <span>↘</span></p></header><div id="meal-list" class="meal-list"></div></section>
+<section class="colophon"><span class="colophon-mark" aria-hidden="true">✳</span><div><span class="eyebrow">A QUICK NOTE FROM THE KITCHEN</span><p id="source-note"></p><p>“Or” means a listed alternative. Photographs are illustrative, not evidence of the exact serving.</p><p class="fineprint">Weekday/weekend timings follow the previous website's schedule. Dated committee notices take priority. Portions and nutrition were not supplied.</p><a href="image-credits.html">PHOTO CREDITS &amp; SOURCES ↗</a></div></section>
 </main>
-<footer><a class="footer-wordmark" href="./">THE MESS v. HUNGER</a><span>Unofficial student project · All times India Standard Time</span><a href="https://github.com/aalok-gnlu/mess-menu" target="_blank" rel="noopener">Open case file ↗</a></footer>
-</div><noscript><p class="no-js">This menu uses JavaScript to show date-specific dishes and notices. <a href="menu-data.js">The source data is here.</a></p></noscript>
-<script src="menu-data.js"></script><script src="menu-core.js"></script><script src="app.js"></script>
+<footer><a class="footer-wordmark" href="./">GNLU MESS CLUB</a><span>Unofficial student project · Times in IST</span><a href="https://github.com/aalok-gnlu/mess-menu" target="_blank" rel="noopener">MADE BY THE MESS ↗</a></footer>
+<noscript><p class="no-js">This menu uses JavaScript to show date-specific dishes and notices. <a href="menu-data.js">The source data is here.</a></p></noscript>
+<script src="menu-data.js"></script><script src="menu-core.js"></script><script src="app.js"></script><script src="scene.js"></script>
 </body></html>

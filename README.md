@@ -1,6 +1,6 @@
-# The Daily Dish · GNLU Mess Menu
+# Mess, Set. · GNLU Mess Menu
 
-A full rebuild of the original wheel and boxed menu as a playful campus case file: **The Mess v. Hunger**. Each day is a hearing, each meal is a numbered matter, and the full week reads like a roll call. A typographic newspaper cover, marked exhibit photography, hand-drawn bowl illustration and red docket margin make the page feel closer to a student-produced legal broadsheet than a conventional restaurant menu. The meal section is one continuous annotated list, with no tiled card grid. Built in plain HTML, CSS, JavaScript and SVG; no build step or dependency installation.
+A full rebuild of the original wheel and boxed menu as **Mess, Set.** The page opens on a floating, perspective-tilted stainless-steel thali, with real dish photography, hand-drawn spoon and garnish details, tactile lighting, grain, and pointer-reactive motion. The rest of the menu unfolds as a serving lineup rather than a dashboard of cards. Built in plain HTML, CSS, JavaScript and SVG; no build step or dependency installation.
 
 ## What the site does
 
@@ -53,8 +53,8 @@ They have been left untouched so cleanup is optional. Keep `images/bowl.svg` and
 
 ## Design references
 
-Reviewed [Swiper’s editorial menu](https://studio.swiperjs.com/templates/restaurant-menu-editorial), [Sleek’s meal planner](https://sleek.design/templates/meal-planner-app), and [Bootdey’s weekly calendar](https://www.bootdey.com/snippets/view/Weekly-calendar). The new visual direction is a legal case file crossed with a student newspaper: oversized serif masthead, monospaced docket details, a red vertical file rule, irregular exhibit photography, one continuous meal roll and original SVG marginalia. It deliberately leaves the standard dashboard/card-grid pattern behind.
+The visual direction is an imagined, tactile mess-hall tabletop: a CSS-built steel tray with stacked rims, a recessed photo well, cast shadows, animated tilt, and original hand-drawn SVG utensils. Dish photographs come from the menu's attributed public sources; no generated food imagery is used. Day selection, weekly menu, notices, and meal expansion remain functional and keyboard accessible.
 
 ## Checks
 
-`node scripts/check-menu.cjs` verifies all 28 unique slots, official Saturday dishes, India-time conversion, temporary timing and dietary boundaries, date arithmetic, expiry, and photo metadata. The redesign also passed a DOM smoke check for menu rendering, day/week controls, the weekly panel, temporary item filtering, expiry notices, returning to today, image failure fallback and internal anchors. A browser-based visual check should be run when browser preview infrastructure is available.
+`node scripts/check-menu.cjs` verifies all 28 unique slots, official Saturday dishes, India-time conversion, temporary timing and dietary boundaries, date arithmetic, expiry, and photo metadata. The redesign also passed a DOM smoke check for menu rendering, day/week controls, the weekly panel, temporary item filtering, expiry notices, returning to today, image failure fallback and internal anchors. A headless browser was unavailable in the environment for screenshot-based visual review.
