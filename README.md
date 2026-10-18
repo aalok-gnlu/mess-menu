@@ -1,6 +1,6 @@
 # The Daily Dish · GNLU Mess Menu
 
-A complete rebuild of the original wheel interface as a warm campus food journal. Plain HTML, CSS, JavaScript and SVG, hosted on GitHub Pages. No build step or dependency installation.
+A full rebuild of the original wheel and boxed menu as a playful campus case file: **The Mess v. Hunger**. Each day is a hearing, each meal is a numbered matter, and the full week reads like a roll call. A typographic newspaper cover, marked exhibit photography, hand-drawn bowl illustration and red docket margin make the page feel closer to a student-produced legal broadsheet than a conventional restaurant menu. The meal section is one continuous annotated list, with no tiled card grid. Built in plain HTML, CSS, JavaScript and SVG; no build step or dependency installation.
 
 ## What the site does
 
@@ -53,7 +53,7 @@ They have been left untouched so cleanup is optional. Keep `images/bowl.svg` and
 
 ## Design references
 
-Reviewed [Swiper’s editorial menu](https://studio.swiperjs.com/templates/restaurant-menu-editorial), [Sleek’s meal planner](https://sleek.design/templates/meal-planner-app), and [Bootdey’s weekly calendar](https://www.bootdey.com/snippets/view/Weekly-calendar). The resulting site is an original implementation, with editorial typography, a paper-and-forest palette, a date ribbon, original bowl and place-setting SVGs, and attributed dish photography.
+Reviewed [Swiper’s editorial menu](https://studio.swiperjs.com/templates/restaurant-menu-editorial), [Sleek’s meal planner](https://sleek.design/templates/meal-planner-app), and [Bootdey’s weekly calendar](https://www.bootdey.com/snippets/view/Weekly-calendar). The new visual direction is a legal case file crossed with a student newspaper: oversized serif masthead, monospaced docket details, a red vertical file rule, irregular exhibit photography, one continuous meal roll and original SVG marginalia. It deliberately leaves the standard dashboard/card-grid pattern behind.
 
 ## Checks
 
