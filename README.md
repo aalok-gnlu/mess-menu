@@ -57,4 +57,4 @@ The visual direction is an imagined, tactile mess-hall tabletop: a CSS-built ste
 
 ## Checks
 
-`node scripts/check-menu.cjs` verifies all 28 unique slots, official Saturday dishes, India-time conversion, temporary timing and dietary boundaries, date arithmetic, expiry, and photo metadata. The redesign also passed a DOM smoke check for menu rendering, day/week controls, the weekly panel, temporary item filtering, expiry notices, returning to today, image failure fallback and internal anchors. A headless browser was unavailable in the environment for screenshot-based visual review.
+`node scripts/check-menu.cjs` verifies all 28 unique slots, official Saturday dishes, India-time conversion, temporary timing and dietary boundaries, date arithmetic, expiry, and photo metadata. The redesign also passed a DOM smoke check for menu rendering, day/week controls, the weekly panel, temporary item filtering, expiry notices, returning to today, image failure fallback and internal anchors. The deployed page was visually inspected in Chrome after publication.
